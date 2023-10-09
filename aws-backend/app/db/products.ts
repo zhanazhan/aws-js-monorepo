@@ -146,7 +146,7 @@ export const PRODUCTS: Product[] = [
 
 export class ProductRepository {
 
-  async create(product: Product) {
+  async create(product: Product){
     PRODUCTS.push(product);
     return product;
   }
@@ -160,8 +160,12 @@ export class ProductRepository {
     return PRODUCTS;
   }
 
-  async findOne(param: { id: string }) {
-    return PRODUCTS.filter((item) => item.id === param.id)[0];
+  async findOne(param: { id: string }): Promise<Product> {
+    const product = PRODUCTS.filter((item) => item.id === param.id);
+    if (!product || product.length === 0) {
+      throw new Error(`Product(${param.id}) not found`);
+    }
+    return product[0];
   }
 
   async deleteOne(param: { id: string }) {
