@@ -20,18 +20,18 @@ package:
     - config/.env.dev
 
 functions:
-  create:
-    handler: app/handler.create
-    events:
-      - http:
-          path: products
-          method: post
-  update:
-    handler: app/handler.update
-    events:
-      - http:
-          path: products/{id}
-          method: put
+#  create:
+#    handler: app/handler.create
+#    events:
+#      - http:
+#          path: products
+#          method: post
+#  update:
+#    handler: app/handler.update
+#    events:
+#      - http:
+#          path: products/{id}
+#          method: put
   find:
     handler: app/handler.find
     events:
@@ -45,9 +45,9 @@ functions:
           path: products/{id}
           method: get
 
-  deleteOne:
-    handler: app/handler.deleteOne
-    events:
-      - http:
-          path: products/{id}
-          method: delete
+#  deleteOne:
+#    handler: app/handler.deleteOne
+#    events:
+#      - http:
+#          path: products/{id}
+#          method: delete
