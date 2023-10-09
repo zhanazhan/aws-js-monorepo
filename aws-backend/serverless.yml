@@ -24,30 +24,30 @@ functions:
     handler: app/handler.create
     events:
       - http:
-          path: books
+          path: products
           method: post
   update:
     handler: app/handler.update
     events:
       - http:
-          path: books/{id}
+          path: products/{id}
           method: put
   find:
     handler: app/handler.find
     events:
       - http:
-          path: books
+          path: products
           method: get
   findOne:
     handler: app/handler.findOne
     events:
       - http:
-          path: books/{id}
+          path: products/{id}
           method: get
 
   deleteOne:
     handler: app/handler.deleteOne
     events:
       - http:
-          path: books/{id}
+          path: products/{id}
           method: delete

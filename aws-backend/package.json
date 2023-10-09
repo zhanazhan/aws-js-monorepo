@@ -1,7 +1,7 @@
 {
-  "name": "aws-node-typescript-rest-api",
+  "name": "aws-backend",
   "version": "1.0.0",
-  "description": "This is simple REST API example for AWS Lambda By Serverless framework with TypeScript and MongoDB Atlas.",
+  "description": "AWS Lambda By Serverless framework with TypeScript for AWS JS Homeworks.",
   "main": "index.js",
   "scripts": {
     "lint": "tslint -p tsconfig.json -c tslint.json",
@@ -15,7 +15,8 @@
   ],
   "dependencies": {
     "dotenv": "^8.2.0",
-    "mongoose": "^5.9.10"
+    "mongoose": "^5.9.10",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.51",
@@ -42,19 +43,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Q-Angelo/aws-node-typescript-rest-api.git"
+    "url": "git+https://github.com/zhanazhan/aws-js-monorepo.git"
   },
   "keywords": [
     "Nodejs",
     "TypeScript",
     "ServerLess",
-    "MongoDB Atlas",
     "AWS Lambda"
   ],
-  "author": "May",
+  "author": "Jake",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Q-Angelo/aws-node-typescript-rest-api/issues"
+    "url": "https://github.com/zhanazhan/aws-js-monorepo/issues"
   },
-  "homepage": "https://github.com/Q-Angelo/aws-node-typescript-rest-api#readme"
+  "homepage": "https://github.com/zhanazhan/aws-js-monorepo#readme"
 }
