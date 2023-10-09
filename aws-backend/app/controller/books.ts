@@ -12,6 +12,7 @@ export class BooksController extends BooksService {
   /**
    * Create book
    * @param {*} event
+   * @param context
    */
   async create (event: any, context?: Context) {
     console.log('functionName', context.functionName);
