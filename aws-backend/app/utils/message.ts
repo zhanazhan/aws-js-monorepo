@@ -24,6 +24,10 @@ class Result {
   bodyToString () {
     return {
       statusCode: this.statusCode,
+      headers: {
+        'Access-Control-Allow-Origin': 'https://node-in-aws-web-bucket.s3.eu-west-1.amazonaws.com',
+        'Access-Control-Allow-Credentials': true,
+      },
       body: JSON.stringify({
         code: this.code,
         message: this.message,
