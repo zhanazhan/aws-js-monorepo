@@ -2,7 +2,9 @@ import { ResponseVO } from '../model/vo/responseVo';
 
 enum StatusCode {
   success = 200,
-  not_found = 404
+  not_found = 404,
+  bad_request = 400,
+  server_error = 500,
 }
 
 class Result {
@@ -45,7 +47,7 @@ export class MessageUtil {
   }
 
   static error(code: number = 1000, message: string) {
-    const result = new Result(StatusCode.not_found, code, message);
+    const result = new Result(code === 404 ? StatusCode.not_found : StatusCode.bad_request, code, message);
 
     console.log(result.bodyToString());
     return result.bodyToString();
