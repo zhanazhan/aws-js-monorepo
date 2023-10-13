@@ -1,4 +1,4 @@
-service: aws-node-rest-api-typescript
+service: aws-backend
 
 frameworkVersion: "3"
 
