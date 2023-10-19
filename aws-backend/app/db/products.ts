@@ -146,22 +146,28 @@ export const PRODUCTS: Product[] = [
 
 export class ProductRepository {
 
-  async create(product: Product) {
+  async create(product: Product){
     PRODUCTS.push(product);
     return product;
   }
 
   async findOneAndUpdate(query: { id: string }, update: { $set: object }, upsert: { new: boolean }) {
     console.log({query, update, upsert});
-    return PRODUCTS.filter((item) => item.id === query.id)[0];
+    const product = await this.findOne(query);
+    console.log('update product');
+    return product;
   }
 
   async findAll() {
     return PRODUCTS;
   }
 
-  async findOne(param: { id: string }) {
-    return PRODUCTS.filter((item) => item.id === param.id)[0];
+  async findOne(param: { id: string }): Promise<Product> {
+    const product = PRODUCTS.filter((item) => item.id === param.id);
+    if (!product || product.length === 0) {
+      throw {code: 404, message: `Product not found`};
+    }
+    return product[0];
   }
 
   async deleteOne(param: { id: string }) {

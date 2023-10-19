@@ -1,0 +1,18 @@
+[
+    {
+        "id": "1",
+        "address": {
+            "address": "address details",
+            "firstName": "firstName",
+            "lastName": "lastName"
+        },
+
+        "items": [{
+            "productId": "1",
+            "count": "100"
+        }],
+        "statusHistory": [{
+            "status": "approved (MOCK)"
+        }]
+    }
+]

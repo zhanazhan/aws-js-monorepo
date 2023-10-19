@@ -1,6 +1,6 @@
-name: aws-node-rest-api-typescript
-org: serverlessinc
+name: aws-backend
+org: jakecorp
 description: Deploys a Node REST API service with traditional Serverless Framework and Typescript
 keywords: aws, serverless, faas, lambda, node, typescript
-repo: https://github.com/serverless/examples/aws-node-rest-api-typescript
+repo: https://github.com/zhanazhan/aws-js-monorepo
 license: MIT

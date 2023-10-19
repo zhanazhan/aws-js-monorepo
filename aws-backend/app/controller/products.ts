@@ -82,7 +82,6 @@ export class ProductsController extends ProductService {
 
     try {
       const result = await this.findOneProductById(id);
-
       return MessageUtil.success(result);
     } catch (err) {
       console.error(err);

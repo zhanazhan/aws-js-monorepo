@@ -55,7 +55,7 @@ export class ProductService {
      * Query product by id
      * @param id
      */
-    protected findOneProductById(id: string) {
+    protected findOneProductById(id: string): Promise<Product> {
         return this.productRepository.findOne({id});
     }
 
