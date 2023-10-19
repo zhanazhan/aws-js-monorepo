@@ -1,6 +1,7 @@
 import {Product} from "../model";
 import {BaseRepository} from "./client";
 import {UpdateCommand} from "@aws-sdk/lib-dynamodb";
+import {IdGenerator} from "../utils/id-generator";
 
 export class ProductRepository extends BaseRepository<Product> {
 
@@ -10,7 +11,7 @@ export class ProductRepository extends BaseRepository<Product> {
 
   async create(product: Product): Promise<Product> {
     const preparedProduct = {
-      "id": this.id(),
+      "id": product.id ?? IdGenerator.generateUUID(),
       "title": product.title,
       "description": product.description,
       "price": product.price.toString()

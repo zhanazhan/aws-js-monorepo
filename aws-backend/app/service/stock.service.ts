@@ -1,7 +1,8 @@
 import {StockRepository} from "../db/stock.repository";
 import {Stock} from "../model";
 import {BaseService} from "./base.service";
-import {DeleteCommand, GetCommand} from "@aws-sdk/lib-dynamodb";
+import {GetItemCommand, DeleteItemCommand} from "@aws-sdk/client-dynamodb";
+import {unmarshall} from "@aws-sdk/util-dynamodb";
 
 export class StockService implements BaseService<Stock> {
   private repository: StockRepository;
@@ -50,12 +51,15 @@ export class StockService implements BaseService<Stock> {
    * @param id
    */
   async findOneById(id: string): Promise<Stock> {
-    return this.repository.execute(new GetCommand({
+    const query = {
       TableName: this.table,
       Key: {
-        product_id: { S: id }
+        "product_id": {S: id}
       },
-    }));
+    };
+    console.log("stock query", query);
+    const stock = await this.repository.execute(new GetItemCommand(query));
+    return unmarshall(stock.Item) as Stock;
   }
 
   /**
@@ -63,10 +67,10 @@ export class StockService implements BaseService<Stock> {
    * @param id
    */
   async deleteOneById(id: string) {
-    await this.repository.execute(new DeleteCommand({
+    await this.repository.execute(new DeleteItemCommand({
       TableName: this.table,
       Key: {
-        product_id: { S: id },
+        "product_id": {S: id},
       },
     }));
   }

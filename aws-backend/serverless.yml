@@ -8,8 +8,8 @@ provider:
   lambdaHashingVersion: '20201221'
   environment:
     NODE_ENV: dev
-    PRODUCTS_TABLE: products_v2
-    STOCKS_TABLE: stocks_v2
+    PRODUCTS_TABLE: products
+    STOCKS_TABLE: stocks
   iam:
     role:
       statements:
@@ -141,11 +141,19 @@ resources:
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
           - AttributeName: product_id
             AttributeType: S
         KeySchema:
-          -
-            AttributeName: product_id
+          - AttributeName: product_id
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: StockIdIndex
+            KeySchema:
+                - AttributeName: id
+                  KeyType: HASH
+            Projection:
+              ProjectionType: 'ALL'
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.STOCKS_TABLE}

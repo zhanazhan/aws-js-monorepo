@@ -91,11 +91,12 @@ export class ProductService implements BaseService<Product> {
   }
 
   async findOneJson(id: string): Promise<ProductJson> {
-    const item = await this.repository.findOne({id});
+    const item = await this.findOneById(id);
     const stock = await this.stockService.findOneById(id);
+    console.log({item, stock});
     return {
       ...item,
-      count: stock.count
+      count: stock?.count || 0
     }
   }
 

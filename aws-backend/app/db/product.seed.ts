@@ -1,5 +1,5 @@
 import {Product, ProductJson, Stock} from "../model";
-import {v4 as uuidv4} from 'uuid';
+import {IdGenerator} from "../utils/id-generator";
 
 const PRODUCTS: ProductJson[] = [
   {
@@ -151,12 +151,13 @@ export class ProductSeed {
   }
   public getDataItem(item: ProductJson): { product: Product, stock: Stock } {
     const {title, description, price, count} = item;
-    const product_id = uuidv4();
+    const product_id = IdGenerator.generateUUID();
+    const id = IdGenerator.generateUUID();
     return {
       product: {
         id: product_id, title, description, price
       },
-      stock: {product_id, count}
+      stock: {id, product_id, count}
     };
   }
 }

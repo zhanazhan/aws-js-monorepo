@@ -1,6 +1,7 @@
 import {Stock} from "../model";
 import {BaseRepository} from "./client";
 import {UpdateCommand} from "@aws-sdk/lib-dynamodb";
+import {IdGenerator} from "../utils/id-generator";
 
 export class StockRepository extends BaseRepository<Stock> {
 
@@ -10,6 +11,7 @@ export class StockRepository extends BaseRepository<Stock> {
 
   async create(item: Stock) {
     const preparedProduct = {
+      "id": item.id ?? IdGenerator.generateUUID(),
       "product_id": item.product_id,
       "count": item.count.toString()
     };

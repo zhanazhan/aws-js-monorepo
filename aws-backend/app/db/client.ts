@@ -1,4 +1,4 @@
-import {DynamoDBClient} from "@aws-sdk/client-dynamodb";
+import {DeleteItemCommand, DynamoDBClient, GetItemCommand} from "@aws-sdk/client-dynamodb";
 import {
   BatchWriteCommand,
   DeleteCommand,
@@ -9,14 +9,14 @@ import {
   ScanCommand,
   UpdateCommand
 } from "@aws-sdk/lib-dynamodb";
-import {v4 as uuidv4} from 'uuid';
-import {GetCommandOutput} from "@aws-sdk/lib-dynamodb/dist-types/commands/GetCommand";
-import {PutCommandOutput} from "@aws-sdk/lib-dynamodb/dist-types/commands/PutCommand";
-import {QueryCommandOutput} from "@aws-sdk/lib-dynamodb/dist-types/commands/QueryCommand";
-import {ScanCommandOutput} from "@aws-sdk/lib-dynamodb/dist-types/commands/ScanCommand";
-import {UpdateCommandOutput} from "@aws-sdk/lib-dynamodb/dist-types/commands/UpdateCommand";
-import {DeleteCommandOutput} from "@aws-sdk/lib-dynamodb/dist-types/commands/DeleteCommand";
-import {BatchWriteCommandOutput} from "@aws-sdk/lib-dynamodb/dist-types/commands/BatchWriteCommand";
+import {GetCommandOutput} from "@aws-sdk/lib-dynamodb";
+import {PutCommandOutput} from "@aws-sdk/lib-dynamodb";
+import {QueryCommandOutput} from "@aws-sdk/lib-dynamodb";
+import {ScanCommandOutput} from "@aws-sdk/lib-dynamodb";
+import {UpdateCommandOutput} from "@aws-sdk/lib-dynamodb";
+import {DeleteCommandOutput} from "@aws-sdk/lib-dynamodb";
+import {BatchWriteCommandOutput} from "@aws-sdk/lib-dynamodb";
+import {unmarshall} from "@aws-sdk/util-dynamodb";
 
 export abstract class BaseRepository<T> {
   client = new DynamoDBClient({});
@@ -25,10 +25,6 @@ export abstract class BaseRepository<T> {
 
   protected constructor(tableName) {
     this.tableName = tableName;
-  }
-
-  protected id(): string {
-    return uuidv4();
   }
 
   async batchWrite(insertItems): Promise<BatchWriteCommandOutput> {
@@ -90,10 +86,10 @@ export abstract class BaseRepository<T> {
   }
 
   async deleteById(id: string): Promise<DeleteCommandOutput> {
-    return this.execute(new DeleteCommand({
+    return this.execute(new DeleteItemCommand({
       TableName: this.tableName,
       Key: {
-        id: { S: id },
+        id: {S: id},
       },
     }));
   }
@@ -106,15 +102,17 @@ export abstract class BaseRepository<T> {
   }
 
   protected async findById(id: string): Promise<GetCommandOutput> {
-    return this.execute(new GetCommand({
+    const query = {
       TableName: this.tableName,
       Key: {
-        "id": { S: id }
+        "id": {S: id}
       },
-    }));
+    };
+    console.log("db query", query);
+    return this.execute(new GetItemCommand(query));
   }
 
-  protected async insert(newItem): Promise<PutCommandOutput & {Item: T}> {
+  protected async insert(newItem): Promise<PutCommandOutput & { Item: T }> {
     /*
     {
       TableName: "HappyAnimals",
@@ -163,7 +161,7 @@ export abstract class BaseRepository<T> {
   }
 
 
-  protected async updatePartial(query: UpdateCommand): Promise<UpdateCommandOutput & {Item: T}> {
+  protected async updatePartial(query: UpdateCommand): Promise<UpdateCommandOutput & { Item: T }> {
     return this.execute(query);
   }
 
@@ -172,7 +170,7 @@ export abstract class BaseRepository<T> {
     if (!item || !item.Item) {
       throw {code: 404, message: `${this.tableName} not found`};
     }
-    return item.Item as T;
+    return unmarshall(item.Item) as T;
   }
 
   async findAll(): Promise<T[]> {

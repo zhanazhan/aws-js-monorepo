@@ -83,18 +83,21 @@ export class ProductController {
    * @param context
    */
   async findOne(event: any, context: Context) {
-    // The amount of memory allocated for the function
-    console.log('memoryLimitInMB: ', context.memoryLimitInMB);
-
-    const id: string = event.pathParameters.id;
-
+    console.log('functionName', context.functionName);
     try {
+      if (!event.pathParameters?.id) {
+        throw {code: 400, message: `Provide ID of the requested resource`};
+      }
+
+      const id: string = event.pathParameters.id;
+
+      console.log(`request item id: ${id}`);
       const result = await this.service.findOneJson(id);
       return MessageUtil.success(result);
     } catch (err) {
       console.error(err);
 
-      return MessageUtil.error(err.code, err.message);
+      return MessageUtil.error(err.code || 404, err.message);
     }
   }
 
