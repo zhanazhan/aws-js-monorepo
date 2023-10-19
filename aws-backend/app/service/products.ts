@@ -1,6 +1,6 @@
 import {CreateProductDTO} from '../model/dto/createProductDTO';
 import {Product} from '../model';
-import {ProductRepository} from '../db/products';
+import {ProductRepository} from '../db/product.repository';
 
 export class ProductService {
     private productRepository: ProductRepository;

@@ -2,7 +2,7 @@ import { Context } from 'aws-lambda';
 import { MessageUtil } from '../utils/message';
 import { ProductService } from '../service/products';
 import { CreateProductDTO } from '../model/dto/createProductDTO';
-import {ProductRepository} from "../db/products";
+import {ProductRepository} from "../db/product.repository";
 import {IdGenerator} from "../utils/id-generator";
 
 export class ProductsController extends ProductService {

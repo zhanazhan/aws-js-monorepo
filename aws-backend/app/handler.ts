@@ -8,7 +8,7 @@ dotenv.config({
 });
 
 import { ProductsController } from './controller/products';
-import { ProductRepository } from './db/products';
+import { ProductRepository } from './db/product.repository';
 const productsController = new ProductsController(new ProductRepository());
 
 export const create: Handler = (event: any, context: Context) => {
