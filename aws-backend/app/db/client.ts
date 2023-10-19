@@ -114,7 +114,7 @@ export abstract class BaseRepository<T> {
     }));
   }
 
-  protected async insert(updateObject): Promise<PutCommandOutput & {Item: T}> {
+  protected async insert(newItem): Promise<PutCommandOutput & {Item: T}> {
     /*
     {
       TableName: "HappyAnimals",
@@ -125,7 +125,7 @@ export abstract class BaseRepository<T> {
      */
     return this.execute(new PutCommand({
       TableName: this.tableName,
-      Item: updateObject,
+      Item: newItem,
     }));
   }
 

@@ -9,12 +9,11 @@ export class ProductRepository extends BaseRepository<Product> {
   }
 
   async create(product: Product): Promise<Product> {
-    product.id = this.id();
     const preparedProduct = {
-      id: {S: product.id},
-      title: {S: product.title},
-      description: {S: product.description},
-      price: {N: product.price.toString()}
+      "id": this.id(),
+      "title": product.title,
+      "description": product.description,
+      "price": product.price.toString()
     };
     return (await this.insert(preparedProduct)).Item;
   }
@@ -23,7 +22,7 @@ export class ProductRepository extends BaseRepository<Product> {
     return (await this.updatePartial(new UpdateCommand({
       TableName: this.tableName,
       Key: {
-        id: product.id
+        "id": product.id
       },
       UpdateExpression: "set title = :title, description = :description, price = :price",
       ExpressionAttributeValues: {

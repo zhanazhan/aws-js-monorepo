@@ -10,8 +10,8 @@ export class StockRepository extends BaseRepository<Stock> {
 
   async create(item: Stock) {
     const preparedProduct = {
-      product_id: {S: item.product_id},
-      count: {N: item.count.toString()}
+      "product_id": item.product_id,
+      "count": item.count.toString()
     };
     return (await this.insert(preparedProduct)).Item;
   }

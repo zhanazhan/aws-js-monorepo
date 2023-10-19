@@ -15,10 +15,10 @@ export class ProductService implements BaseService<Product> {
   }
 
   async seedData(): Promise<void> {
-    this.productSeed.getProducts()
-      .forEach((item) => {
-        this.createFromJson(item);
-      });
+    const products = this.productSeed.getProducts();
+    for (let i = 0, len = products.length;  i < len; i++) {
+      await this.createFromJson(products[i]);
+    }
   }
 
   /**
@@ -74,13 +74,18 @@ export class ProductService implements BaseService<Product> {
    * Find products
    */
   async findAllJson(): Promise<ProductJson[]> {
+    const products = (await this.repository.findAll());
+    if (products.length === 0) {
+      await this.seedData();
+    }
     const stocks = await this.stockService.findAll();
+    console.log({products, stocks});
     return (await this.repository.findAll())
       .map((item) => {
-        const stock = stocks.find((s) => s.product_id = item.id);
+        const stock = stocks.find((s) => s.product_id === item.id);
         return {
           ...item,
-          count: stock.count
+          count: stock?.count || 0
         }
       });
   }
