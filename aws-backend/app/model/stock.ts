@@ -1,7 +1,4 @@
 export type Stock = {
-  id: string,
-  title: string,
-  description: string,
-  price: number,
+  product_id: string,
   count: number
 };

@@ -8,7 +8,8 @@ provider:
   lambdaHashingVersion: '20201221'
   environment:
     NODE_ENV: dev
-    DYNAMODB_TABLE: ${self:service}-${sls:stage}
+    PRODUCTS_TABLE: products
+    STOCKS_TABLE: stocks
   iam:
     role:
       statements:
@@ -20,7 +21,16 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
-          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.PRODUCTS_TABLE}"
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.STOCKS_TABLE}"
 
 plugins:
   - serverless-plugin-typescript 
@@ -34,18 +44,36 @@ package:
     - config/.env.dev
 
 functions:
-#  create:
-#    handler: app/handler.create
-#    events:
-#      - http:
-#          path: products
-#          method: post
-#  update:
-#    handler: app/handler.update
-#    events:
-#      - http:
-#          path: products/{id}
-#          method: put
+  create:
+    handler: app/handler.create
+    events:
+      - http:
+          path: products
+          method: post
+          cors:
+            origin: 'https://node-in-aws-web-bucket.s3.eu-west-1.amazonaws.com'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: true
+  update:
+    handler: app/handler.update
+    events:
+      - http:
+          path: products/{id}
+          method: put
+          cors:
+            origin: 'https://node-in-aws-web-bucket.s3.eu-west-1.amazonaws.com'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: true
   find:
     handler: app/handler.find
     events:
@@ -77,26 +105,55 @@ functions:
               - X-Amz-Security-Token
             allowCredentials: true
 
-#  deleteOne:
-#    handler: app/handler.deleteOne
-#    events:
-#      - http:
-#          path: products/{id}
-#          method: delete
+  deleteOne:
+    handler: app/handler.deleteOne
+    events:
+      - http:
+          path: products/{id}
+          method: delete
+          cors:
+            origin: 'https://node-in-aws-web-bucket.s3.eu-west-1.amazonaws.com'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: true
 
 resources:
   Resources:
-    TodosDynamoDbTable:
+    products:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
-          -
-            AttributeName: id
+          - AttributeName: id
             AttributeType: S
+          - AttributeName: title
+            AttributeType: S
+          - AttributeName: description
+            AttributeType: S
+          - AttributeName: price
+            AttributeType: N
         KeySchema:
           -
             AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        TableName: ${self:provider.environment.PRODUCTS_TABLE}
+    stocks:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: product_id
+            AttributeType: S
+          - AttributeName: count
+            AttributeType: N
+        KeySchema:
+          -
+            AttributeName: product_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.STOCKS_TABLE}

@@ -7,9 +7,8 @@ dotenv.config({
   path: dotenvPath,
 });
 
-import { ProductsController } from './controller/products';
-import { ProductRepository } from './db/product.repository';
-const productsController = new ProductsController(new ProductRepository());
+import { ProductController } from './controller/product.controller';
+const productsController = new ProductController();
 
 export const create: Handler = (event: any, context: Context) => {
   return productsController.create(event, context);

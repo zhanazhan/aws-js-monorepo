@@ -1,5 +1,5 @@
-export type Product = {
-  id: string,
+export type ProductJson = {
+  id?: string,
   title: string,
   description: string,
   price: number,

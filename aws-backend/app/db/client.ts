@@ -18,7 +18,7 @@ import {UpdateCommandOutput} from "@aws-sdk/lib-dynamodb/dist-types/commands/Upd
 import {DeleteCommandOutput} from "@aws-sdk/lib-dynamodb/dist-types/commands/DeleteCommand";
 import {BatchWriteCommandOutput} from "@aws-sdk/lib-dynamodb/dist-types/commands/BatchWriteCommand";
 
-export abstract class BaseRepository {
+export abstract class BaseRepository<T> {
   client = new DynamoDBClient({});
   dbClient = DynamoDBDocumentClient.from(this.client);
   readonly tableName;
@@ -70,7 +70,7 @@ export abstract class BaseRepository {
     }));
   }
 
-  private async execute(command): Promise<any> {
+  async execute(command): Promise<any> {
     return this.dbClient.send(command);
   }
 
@@ -90,14 +90,6 @@ export abstract class BaseRepository {
   }
 
   async deleteById(id: string): Promise<DeleteCommandOutput> {
-    /*
-    {
-      TableName: "Sodas",
-      Key: {
-        Flavor: "Cola",
-      },
-    }
-     */
     return this.execute(new DeleteCommand({
       TableName: this.tableName,
       Key: {
@@ -106,14 +98,14 @@ export abstract class BaseRepository {
     }));
   }
 
-  async findOneByKey(param): Promise<GetCommandOutput> {
+  protected async findOneByKey(param): Promise<GetCommandOutput> {
     return this.execute(new GetCommand({
       TableName: this.tableName,
       Key: param,
     }));
   }
 
-  async findById(id: string): Promise<GetCommandOutput> {
+  protected async findById(id: string): Promise<GetCommandOutput> {
     return this.execute(new GetCommand({
       TableName: this.tableName,
       Key: {
@@ -122,7 +114,7 @@ export abstract class BaseRepository {
     }));
   }
 
-  async insert(updateObject): Promise<PutCommandOutput> {
+  protected async insert(updateObject): Promise<PutCommandOutput & {Item: T}> {
     /*
     {
       TableName: "HappyAnimals",
@@ -137,7 +129,7 @@ export abstract class BaseRepository {
     }));
   }
 
-  async query(query): Promise<QueryCommandOutput> {
+  protected async query(query): Promise<QueryCommandOutput> {
     /*
     {
       TableName: "CoffeeCrop",
@@ -157,7 +149,7 @@ export abstract class BaseRepository {
     return this.query(extendedQuery);
   }
 
-  async scan(query): Promise<ScanCommandOutput> {
+  protected async scan(query): Promise<ScanCommandOutput> {
     /*
     {
       ProjectionExpression: "#Name, Color, AvgLifeSpan",
@@ -171,24 +163,20 @@ export abstract class BaseRepository {
   }
 
 
-  async update(query): Promise<UpdateCommandOutput> {
-    /*
-    {
-      TableName: "Dogs",
-      Key: {
-        Breed: "Labrador",
-      },
-      UpdateExpression: "set Color = :color",
-      ExpressionAttributeValues: {
-        ":color": "black",
-      },
-      ReturnValues: "ALL_NEW",
+  protected async updatePartial(query: UpdateCommand): Promise<UpdateCommandOutput & {Item: T}> {
+    return this.execute(query);
+  }
+
+  async findOne(param: { id: string }): Promise<T> {
+    const item = await this.findById(param.id);
+    if (!item || !item.Item) {
+      throw {code: 404, message: `${this.tableName} not found`};
     }
-    */
-    return this.execute(new UpdateCommand(Object.assign({
-      TableName: this.tableName,
-      ReturnValues: "ALL_NEW",
-    }, query)));
+    return item.Item as T;
+  }
+
+  async findAll(): Promise<T[]> {
+    return (await this.scan({})).Items as T[];
   }
 
 }

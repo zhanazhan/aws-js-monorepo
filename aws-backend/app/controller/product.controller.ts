@@ -1,13 +1,20 @@
-import { Context } from 'aws-lambda';
-import { MessageUtil } from '../utils/message';
-import { ProductService } from '../service/products';
-import { CreateProductDTO } from '../model/dto/createProductDTO';
+import {Context} from 'aws-lambda';
+import {MessageUtil} from '../utils/message';
+import {CreateProductDTO} from '../model/dto/createProductDTO';
 import {ProductRepository} from "../db/product.repository";
 import {IdGenerator} from "../utils/id-generator";
+import {StockRepository} from "../db/stock.repository";
+import {ProductService} from "../service/product.service";
+import {StockService} from "../service/stock.service";
+import {Product} from "../model";
 
-export class ProductsController extends ProductService {
-  constructor (productRepository: ProductRepository) {
-    super(productRepository);
+export class ProductController {
+  service: ProductService;
+
+  constructor() {
+    const productRepository = new ProductRepository();
+    const stockRepository = new StockRepository()
+    this.service = new ProductService(productRepository, new StockService(stockRepository));
   }
 
   /**
@@ -15,12 +22,12 @@ export class ProductsController extends ProductService {
    * @param {*} event
    * @param context
    */
-  async create (event: any, context?: Context) {
+  async create(event: any, context?: Context) {
     console.log('functionName', context.functionName);
     const params: CreateProductDTO = JSON.parse(event.body);
 
     try {
-      const result = await this.createProduct({
+      const result = await this.service.createFromJson({
         id: IdGenerator.generateUUID(),
         title: params.title,
         description: params.description,
@@ -40,12 +47,14 @@ export class ProductsController extends ProductService {
    * Update a product by id
    * @param event
    */
-  async update (event: any) {
+  async update(event: any) {
     const id: string = event.pathParameters.id;
-    const body: object = JSON.parse(event.body);
-
+    const body: Product = JSON.parse(event.body);
     try {
-      const result = await this.updateProduct(id, body);
+      if (id !== body.id) {
+        throw {code: 401, message: `Bad Request`};
+      }
+      const result = await this.service.update(body);
       return MessageUtil.success(result);
     } catch (err) {
       console.error(err);
@@ -57,10 +66,9 @@ export class ProductsController extends ProductService {
   /**
    * Find product list
    */
-  async find () {
+  async find() {
     try {
-      const result = await this.findProducts();
-
+      const result = await this.service.findAllJson();
       return MessageUtil.success(result);
     } catch (err) {
       console.error(err);
@@ -74,14 +82,14 @@ export class ProductsController extends ProductService {
    * @param event
    * @param context
    */
-  async findOne (event: any, context: Context) {
+  async findOne(event: any, context: Context) {
     // The amount of memory allocated for the function
     console.log('memoryLimitInMB: ', context.memoryLimitInMB);
 
     const id: string = event.pathParameters.id;
 
     try {
-      const result = await this.findOneProductById(id);
+      const result = await this.service.findOneJson(id);
       return MessageUtil.success(result);
     } catch (err) {
       console.error(err);
@@ -94,21 +102,16 @@ export class ProductsController extends ProductService {
    * Delete product by id
    * @param event
    */
-  async deleteOne (event: any) {
+  async deleteOne(event: any) {
     const id: string = event.pathParameters.id;
 
     try {
-      const result = await this.deleteOneProductById(id);
-
-      if (result.deletedCount === 0) {
-        return MessageUtil.error(1010, 'The data was not found! May have been deleted!');
-      }
-
-      return MessageUtil.success(result);
+      await this.service.deleteOneById(id);
+      return MessageUtil.success({product: `product with ${id} is deleted`});
     } catch (err) {
       console.error(err);
 
-      return MessageUtil.error(err.code, err.message);
+      return MessageUtil.error(err.code || "401", err.message);
     }
   }
 }

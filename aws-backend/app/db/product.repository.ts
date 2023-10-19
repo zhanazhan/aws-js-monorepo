@@ -1,43 +1,41 @@
 import {Product} from "../model";
 import {BaseRepository} from "./client";
+import {UpdateCommand} from "@aws-sdk/lib-dynamodb";
 
-export class ProductRepository extends BaseRepository {
+export class ProductRepository extends BaseRepository<Product> {
 
   constructor() {
-    super("products");
+    super(process.env.PRODUCTS_TABLE);
   }
 
-  async create(product: Product) {
+  async create(product: Product): Promise<Product> {
     product.id = this.id();
     const preparedProduct = {
-      id: { S: product.id },
-      title: { S: product.title },
-      description: { S: product.description },
-      price: { N: product.price.toString() }
+      id: {S: product.id},
+      title: {S: product.title},
+      description: {S: product.description},
+      price: {N: product.price.toString()}
     };
-    return this.insert(preparedProduct);
+    return (await this.insert(preparedProduct)).Item;
   }
 
-  async findOneAndUpdate(query: { id: string }, update: { $set: object }, upsert: { new: boolean }) {
-    console.log({query, update, upsert});
-    const product = await this.findOne(query);
-    console.log('update product');
-    return product;
+  async update(product: Product): Promise<Product> {
+    return (await this.updatePartial(new UpdateCommand({
+      TableName: this.tableName,
+      Key: {
+        id: product.id
+      },
+      UpdateExpression: "set title = :title, description = :description, price = :price",
+      ExpressionAttributeValues: {
+        ":title": product.title,
+        ":description": product.description,
+        ":price": product.price,
+      },
+      ReturnValues: "ALL_NEW",
+    }))).Item;
   }
 
-  async findAll() {
-    return this.scan({});
-  }
-
-  async findOne(param: { id: string }): Promise<Product> {
-    const product = await this.findById(param.id);
-    if (!product || !product.Item) {
-      throw {code: 404, message: `Product not found`};
-    }
-    return product.Item as Product;
-  }
-
-  async deleteOne(param: { id: string }) {
-    return this.deleteById(param.id);
+  async get(id: string) {
+    return this.findOne({id});
   }
 }
