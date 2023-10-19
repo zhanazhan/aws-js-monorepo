@@ -2,6 +2,7 @@ import {Product} from "../model";
 import {BaseRepository} from "./client";
 import {UpdateCommand} from "@aws-sdk/lib-dynamodb";
 import {IdGenerator} from "../utils/id-generator";
+import {UpdateCommandInput} from "@aws-sdk/lib-dynamodb/dist-types/commands/UpdateCommand";
 
 export class ProductRepository extends BaseRepository<Product> {
 
@@ -16,11 +17,13 @@ export class ProductRepository extends BaseRepository<Product> {
       "description": product.description,
       "price": product.price.toString()
     };
-    return (await this.insert(preparedProduct)).Item;
+    const newProduct = await this.insert(preparedProduct);
+    console.log("new product", newProduct);
+    return newProduct.Item;
   }
 
   async update(product: Product): Promise<Product> {
-    return (await this.updatePartial(new UpdateCommand({
+    const query: UpdateCommandInput = {
       TableName: this.tableName,
       Key: {
         "id": product.id
@@ -32,7 +35,9 @@ export class ProductRepository extends BaseRepository<Product> {
         ":price": product.price,
       },
       ReturnValues: "ALL_NEW",
-    }))).Item;
+    };
+    console.log("query", query);
+    return (await this.updatePartial(new UpdateCommand(query))).Item;
   }
 
   async get(id: string) {

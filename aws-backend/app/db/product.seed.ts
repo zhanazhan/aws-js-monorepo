@@ -149,15 +149,16 @@ export class ProductSeed {
   public getProducts(): ProductJson[] {
     return PRODUCTS;
   }
-  public getDataItem(item: ProductJson): { product: Product, stock: Stock } {
+  public getDataItem(item: ProductJson, update = false): { product: Product, stock: Stock } {
     const {title, description, price, count} = item;
-    const product_id = IdGenerator.generateUUID();
-    const id = IdGenerator.generateUUID();
+    const stock_id = update ? null : IdGenerator.generateUUID();
+    const product: Product = {title, description, price};
+    if (!update) {
+        product.id = IdGenerator.generateUUID();
+    }
     return {
-      product: {
-        id: product_id, title, description, price
-      },
-      stock: {id, product_id, count}
+      product,
+      stock: {id: stock_id, product_id: product.id, count}
     };
   }
 }

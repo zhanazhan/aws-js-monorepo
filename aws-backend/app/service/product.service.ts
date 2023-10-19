@@ -59,8 +59,12 @@ export class ProductService implements BaseService<Product> {
    * Update a product
    * @param data
    */
-  async update(data: Product) {
-    return this.repository.update(data);
+  async update(data: ProductJson) {
+    const {product, stock} = this.productSeed.getDataItem(data, true);
+    const updatedProduct = this.repository.update(product);
+    console.log("updatedProduct", updatedProduct);
+    await this.stockService.update(stock);
+    return updatedProduct;
   }
 
   /**

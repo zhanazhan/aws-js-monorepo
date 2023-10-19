@@ -49,7 +49,7 @@ functions:
     events:
       - http:
           path: products
-          method: post
+          method: put
           cors:
             origin: 'https://node-in-aws-web-bucket.s3.eu-west-1.amazonaws.com'
             headers:
@@ -64,7 +64,7 @@ functions:
     events:
       - http:
           path: products/{id}
-          method: put
+          method: post
           cors:
             origin: 'https://node-in-aws-web-bucket.s3.eu-west-1.amazonaws.com'
             headers:

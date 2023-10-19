@@ -1,7 +1,7 @@
 import {StockRepository} from "../db/stock.repository";
 import {Stock} from "../model";
 import {BaseService} from "./base.service";
-import {GetItemCommand, DeleteItemCommand} from "@aws-sdk/client-dynamodb";
+import {DeleteItemCommand, GetItemCommand} from "@aws-sdk/client-dynamodb";
 import {unmarshall} from "@aws-sdk/util-dynamodb";
 
 export class StockService implements BaseService<Stock> {
@@ -22,7 +22,7 @@ export class StockService implements BaseService<Stock> {
   async create(stock: Stock): Promise<Stock> {
     try {
       const result = await this.repository.create(stock);
-      console.log('stock created');
+      console.log('stock created', result);
       return result;
     } catch (err) {
       console.error(err);

@@ -1,12 +1,11 @@
 import {Context} from 'aws-lambda';
 import {MessageUtil} from '../utils/message';
-import {CreateProductDTO} from '../model/dto/createProductDTO';
 import {ProductRepository} from "../db/product.repository";
 import {IdGenerator} from "../utils/id-generator";
 import {StockRepository} from "../db/stock.repository";
 import {ProductService} from "../service/product.service";
 import {StockService} from "../service/stock.service";
-import {Product} from "../model";
+import {ProductJson} from "../model";
 
 export class ProductController {
   service: ProductService;
@@ -24,7 +23,7 @@ export class ProductController {
    */
   async create(event: any, context?: Context) {
     console.log('functionName', context.functionName);
-    const params: CreateProductDTO = JSON.parse(event.body);
+    const params: ProductJson = JSON.parse(event.body);
 
     try {
       const result = await this.service.createFromJson({
@@ -34,8 +33,8 @@ export class ProductController {
         price: params.price,
         count: params.count
       });
-
-      return MessageUtil.success(result);
+      console.log("product created", result);
+      return MessageUtil.success(result, 201);
     } catch (err) {
       console.error(err);
 
@@ -49,10 +48,10 @@ export class ProductController {
    */
   async update(event: any) {
     const id: string = event.pathParameters.id;
-    const body: Product = JSON.parse(event.body);
+    const body: ProductJson = JSON.parse(event.body);
     try {
       if (id !== body.id) {
-        throw {code: 401, message: `Bad Request`};
+        throw {code: 400, message: `Updating incorrect resource`};
       }
       const result = await this.service.update(body);
       return MessageUtil.success(result);

@@ -1,0 +1,131 @@
+{
+	"info": {
+		"_postman_id": "7d33d23d-466b-44b1-abb2-f1d750f9baf6",
+		"name": "AWS JS Developers",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "8490358"
+	},
+	"item": [
+		{
+			"name": "Get Products",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "https://{{api-gateway}}.execute-api.us-east-1.amazonaws.com/dev/products"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Product by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{api-gateway}}.execute-api.us-east-1.amazonaws.com/dev/products/:id",
+					"protocol": "https",
+					"host": [
+						"{{api-gateway}}",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"products",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "03b5cead-cfcd-43ae-9148-e2b01a421c4e"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Product by ID",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": \"5ffe08de-e055-4ad3-8735-21122ecab066\",\r\n  \"title\": \"New Product Updated V1\",\r\n  \"description\": \"Description Text Updated V1\",\r\n  \"price\": 540.00,\r\n  \"count\": 27\r\n}"
+				},
+				"url": {
+					"raw": "https://{{api-gateway}}.execute-api.us-east-1.amazonaws.com/dev/products/:id",
+					"protocol": "https",
+					"host": [
+						"{{api-gateway}}",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"products",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "5ffe08de-e055-4ad3-8735-21122ecab066"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Product",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"New Product\",\r\n  \"description\": \"Description Text\",\r\n  \"price\": 500.00,\r\n  \"count\": 222\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "https://{{api-gateway}}.execute-api.us-east-1.amazonaws.com/dev/products"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Product by ID",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://{{api-gateway}}.execute-api.us-east-1.amazonaws.com/dev/products/:id",
+					"protocol": "https",
+					"host": [
+						"{{api-gateway}}",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"products",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "03b5cead-cfcd-43ae-9148-e2b01a421c4e"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

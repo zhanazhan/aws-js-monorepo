@@ -40,8 +40,8 @@ class Result {
 }
 
 export class MessageUtil {
-  static success(data: object): ResponseVO {
-    const result = new Result(StatusCode.success, 0, 'success', data);
+  static success(data: object, code = 200): ResponseVO {
+    const result = new Result(StatusCode.success, code, 'success', data);
 
     return result.bodyToString();
   }

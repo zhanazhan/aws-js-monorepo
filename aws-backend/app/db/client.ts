@@ -121,10 +121,12 @@ export abstract class BaseRepository<T> {
       },
     })
      */
-    return this.execute(new PutCommand({
+    const query = {
       TableName: this.tableName,
       Item: newItem,
-    }));
+    };
+    console.log("insert query", query);
+    return this.execute(new PutCommand(query));
   }
 
   protected async query(query): Promise<QueryCommandOutput> {
