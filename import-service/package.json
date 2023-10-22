@@ -1,5 +1,5 @@
 {
-  "name": "aws-backend",
+  "name": "aws-importer-service",
   "version": "1.0.0",
   "description": "AWS Lambda By Serverless framework with TypeScript for AWS JS Homeworks.",
   "main": "index.js",

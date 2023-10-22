@@ -3,7 +3,7 @@ service: import-service
 frameworkVersion: "3"
 
 custom:
-  bucket: uploaded
+  bucket: jake-uploaded
 
 provider:
   name: aws
@@ -47,4 +47,4 @@ resources:
     FileUploadBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: uploaded
+        BucketName: ${self:custom.bucket}
