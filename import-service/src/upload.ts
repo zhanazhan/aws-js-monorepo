@@ -10,8 +10,8 @@ export const handler = async (event) => {
     // const { fileTypeFromBuffer } = await import('file-type');
     try {
         const boundary = getBoundary(event.headers['Content-Type']);
-
-        const parts = Parse(event.body, boundary);
+        const bufferedBody = new Buffer(event.body,'utf-8');
+        const parts = Parse(bufferedBody, boundary);
 
         const urls = [];
         console.log('event data', boundary, parts.length);
