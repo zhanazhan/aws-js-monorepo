@@ -8,7 +8,6 @@ custom:
 provider:
   name: aws
   runtime: nodejs18.x
-  region: 'us-east-1'
   lambdaHashingVersion: '20201221'
   environment:
     NODE_ENV: dev
@@ -20,6 +19,9 @@ provider:
           Action:
             - 's3:*'
           Resource: '*'
+
+plugins:
+  - serverless-plugin-typescript
 
 functions:
   importProductsFile:
@@ -37,11 +39,12 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - prefix: uploaded/
+            - suffix: .csv
           existing: true
 
 resources:
   Resources:
-    ImageUploadBucket:
+    FileUploadBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: uploaded
