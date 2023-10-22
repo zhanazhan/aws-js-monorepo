@@ -1,60 +1,62 @@
 import {Responses} from './common/api.response';
 import S3 from './common/s3';
-
-import { fileTypeFromBuffer } from 'file-type';
-import { v4 as uuid } from 'uuid';
+import {getBoundary, Parse} from 'parse-multipart';
+import {v4 as uuid} from 'uuid';
 
 const allowedMimeTypes = ['text/csv'];
 
 export const handler = async (event) => {
     console.log('event', event);
-
+    // const { fileTypeFromBuffer } = await import('file-type');
     try {
-        const body = JSON.parse(event.body);
+        const boundary = getBoundary(event.headers['Content-Type']);
 
-        if (!body || !body.file || !body.mime) {
-            return Responses._400({ message: 'incorrect body' });
+        const parts = Parse(event.body, boundary);
+
+        const urls = [];
+        console.log('event data', boundary, parts.length);
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i];
+            // { filename: 'A.txt', type: 'text/plain', data: <Buffer 41 41 41 41 42 42 42 42> }
+
+            if (!part || !part.data || !part.type) {
+                return Responses._400({message: 'incorrect body'});
+            }
+
+            if (allowedMimeTypes.includes(part.type) === false) {
+                return Responses._400({message: 'incorrect mime type'});
+            }
+
+            const detectedExt = 'csv';
+            const name = uuid();
+            const key = `uploaded/${name}.${detectedExt}`;
+
+            console.log(
+                `writing file to bucket ${process.env.IMAGE_UPLOAD_BUCKET} with key ${key}`
+            );
+
+            await S3.write(process.env.IMAGE_UPLOAD_BUCKET, key, part.data, part.type);
+
+            // const url = `https://${process.env.IMAGE_UPLOAD_BUCKET}.s3.${process.env.REGION}.amazonaws.com/${key}`;
+
+            const url = await S3.getPreSignedURL(
+                process.env.IMAGE_UPLOAD_BUCKET,
+                key,
+                30
+            );
+
+            urls.push({filename: part.filename, url});
         }
-
-        if (allowedMimeTypes.includes(body.mime) === false) {
-            return Responses._400({ message: 'incorrect mime type' });
+        if (urls.length === 0) {
+            throw {message: "no files detected"};
         }
-
-        let fileData = body.file;
-
-        const buffer = Buffer.from(fileData, 'base64'); // method to create a new buffer filled with the specified string, array, or buffer.
-        const fileInfo = await fileTypeFromBuffer(buffer);
-        const detectedExt = fileInfo.ext;
-        const detectedMime = fileInfo.mime;
-
-        if (detectedMime !== body.mime) {
-            return Responses._400({ message: 'mime type mismatch' });
-        }
-
-        const name = uuid();
-        const key = `uploaded/${name}.${detectedExt}`;
-
-        console.log(
-            `writing image to bucket ${process.env.IMAGE_UPLOAD_BUCKET} with key ${key}`
-        );
-
-        await S3.write(process.env.IMAGE_UPLOAD_BUCKET, key, buffer, body.mime);
-
-        // const url = `https://${process.env.IMAGE_UPLOAD_BUCKET}.s3.${process.env.REGION}.amazonaws.com/${key}`;
-
-        const url = await S3.getPreSignedURL(
-            process.env.IMAGE_UPLOAD_BUCKET,
-            key,
-            30
-        );
-
         return Responses._200({
             message: 'file uploaded',
-            imageURL: url,
+            urls
         });
     } catch (error) {
         // error handling
         console.error(error);
-        return Responses._500({ message: error.message || 'failed to upload file' });
+        return Responses._500({message: error.message || 'failed to upload file(s)'});
     }
 };
