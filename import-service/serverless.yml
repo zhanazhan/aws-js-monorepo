@@ -3,7 +3,7 @@ service: import-service
 frameworkVersion: "3"
 
 custom:
-  bucket: uploads
+  bucket: uploaded
 
 provider:
   name: aws
@@ -22,17 +22,26 @@ provider:
           Resource: '*'
 
 functions:
-  imageUpload:
-    handler: src/functions/imageUpload.handler
+  importProductsFile:
+    handler: src/upload.handler
     events:
       - http:
-          path: /image-upload
+          path: /import
           method: POST
           cors: true
+  importFileParser:
+    handler: src/parser.handler
+    events:
+      - s3:
+          bucket: ${self:custom.bucket}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+          existing: true
 
 resources:
   Resources:
     ImageUploadBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:custom.bucket}
+        BucketName: uploaded

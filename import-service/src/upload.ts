@@ -32,7 +32,7 @@ export const handler = async (event) => {
         }
 
         const name = uuid();
-        const key = `uploads/${name}.${detectedExt}`;
+        const key = `uploaded/${name}.${detectedExt}`;
 
         console.log(
             `writing image to bucket ${process.env.IMAGE_UPLOAD_BUCKET} with key ${key}`
