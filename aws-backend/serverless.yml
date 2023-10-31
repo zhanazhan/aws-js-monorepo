@@ -10,6 +10,7 @@ provider:
     NODE_ENV: dev
     PRODUCTS_TABLE: products
     STOCKS_TABLE: stocks
+    SQS_QUEUE: receiverQueue
   iam:
     role:
       statements:
@@ -31,6 +32,16 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.STOCKS_TABLE}"
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:ChangeMessageVisibility
+            - sqs:GetQueueUrl
+            - sqs:GetQueueAttributes
+          Resource:
+            - Fn::GetAtt: [ "${provider.environment.SQS_QUEUE}", Arn ]
 
 plugins:
   - serverless-plugin-typescript 
@@ -121,6 +132,15 @@ functions:
               - X-Amz-Security-Token
             allowCredentials: true
 
+  catalogBatchProcess:
+    handler: app/handler.catalogBatchProcess
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - receiverQueue
+              - Arn
+
 resources:
   Resources:
     products:
@@ -157,3 +177,9 @@ resources:
               ProjectionType: 'ALL'
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.STOCKS_TABLE}
+    catalogItemsQueue:
+      Type: 'AWS::SQS::Queue'
+      Properties:
+        BatchSize: 5
+        QueueName: "${provider.environment.SQS_QUEUE}"
+

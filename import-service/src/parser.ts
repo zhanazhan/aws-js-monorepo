@@ -2,6 +2,7 @@ import {Responses} from './common/api.response';
 import S3 from './common/s3';
 import {parseStream} from "@fast-csv/parse";
 import {Readable} from "stream";
+import {receiver} from "./sqs";
 
 export const handler = async (event) => {
     console.log('event', event);
@@ -35,6 +36,7 @@ const processFile = async ({ bucket, file }) => {
             headers: true
         }).on('csv data', (data) => {
             console.log(data);
+            receiver()
         }).on('error', (error) => {
             console.error(error);
             reject(error);
