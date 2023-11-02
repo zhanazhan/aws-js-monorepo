@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
+    "lib": ["esnext", "dom", "vue"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noUnusedLocals": true,
