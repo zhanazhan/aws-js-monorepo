@@ -1,8 +1,27 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import {APIGatewayProxyHandler, SQSHandler} from 'aws-lambda';
 import {SQS} from "@aws-sdk/client-sqs";
-import { SQSHandler, SQSMessageAttributes } from 'aws-lambda';
 
 const sqs = new SQS();
+
+export const queueUrl = (context) => {
+    const region = context.invokedFunctionArn.split(':')[3];
+    const accountId = context.invokedFunctionArn.split(':')[4];
+    const queueName: string = process.env.SQS_QUEUE;
+    return `https://sqs.${region}.amazonaws.com/${accountId}/${queueName}`;
+}
+
+export const sqsSend = async (queueUrl: string, body: string) => {
+    await sqs.sendMessage({
+        QueueUrl: queueUrl,
+        MessageBody: body,
+        MessageAttributes: {
+            AttributeNameHere: {
+                StringValue: 'Products',
+                DataType: 'String',
+            },
+        },
+    });
+}
 
 export const sender: APIGatewayProxyHandler = async (event, context) => {
     let statusCode: number = 200;
@@ -17,24 +36,8 @@ export const sender: APIGatewayProxyHandler = async (event, context) => {
         };
     }
 
-    const region = context.invokedFunctionArn.split(':')[3];
-    const accountId = context.invokedFunctionArn.split(':')[4];
-    const queueName: string = process.env.SQS_QUEUE;
-
-    const queueUrl: string = `https://sqs.${region}.amazonaws.com/${accountId}/${queueName}`
-
     try {
-        await sqs.sendMessage({
-            QueueUrl: queueUrl,
-            MessageBody: event.body,
-            MessageAttributes: {
-                AttributeNameHere: {
-                    StringValue: 'Products',
-                    DataType: 'String',
-                },
-            },
-        });
-
+        await sqsSend(queueUrl(context), JSON.stringify(event.body));
         message = 'Message placed in the Queue!';
 
     } catch (error) {
@@ -51,14 +54,20 @@ export const sender: APIGatewayProxyHandler = async (event, context) => {
     };
 };
 
-export const receiver: SQSHandler = async (event) => {
+export const receiver: SQSHandler = async (event, content) => {
     try {
         for (const record of event.Records) {
-            const messageAttributes: SQSMessageAttributes = record.messageAttributes;
-            console.log('Message Attributtes -->  ', messageAttributes.AttributeNameHere.stringValue);
-            console.log('Message Body -->  ', record.body);
-            // Do something
+            await sqsSend(queueUrl(content), JSON.stringify(record.body));
         }
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+export const csvSender = async (data, content) => {
+    try {
+        await sqsSend(queueUrl(content), JSON.stringify(data));
     } catch (error) {
         console.log(error);
     }

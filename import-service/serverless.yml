@@ -12,6 +12,7 @@ provider:
   environment:
     NODE_ENV: dev
     IMAGE_UPLOAD_BUCKET: ${self:custom.bucket}
+    SQS_QUEUE: receiverQueue
   iam:
     role:
       statements:
@@ -19,6 +20,20 @@ provider:
           Action:
             - 's3:*'
           Resource: '*'
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:ChangeMessageVisibility
+            - sqs:GetQueueUrl
+            - sqs:GetQueueAttributes
+          Resource:
+            - Fn::GetAtt: [ "${provider.environment.SQS_QUEUE}", Arn ]
+        - Effect: Allow
+          Resource: "*"
+          Action:
+            - "sns:*"
 
 plugins:
   - serverless-plugin-typescript
@@ -48,3 +63,16 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:custom.bucket}
+    CatalogItemsQueue:
+      Type: AWS::SQS::Queue
+    CreateProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: Create Product Notification
+        SnsTopicName: createProductTopic
+    EmailSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        EndpointIdentifier:
+

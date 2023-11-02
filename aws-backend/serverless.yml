@@ -11,6 +11,8 @@ provider:
     PRODUCTS_TABLE: products
     STOCKS_TABLE: stocks
     SQS_QUEUE: receiverQueue
+    CREATE_PRODUCT_TOPIC_ARN:
+      Ref: 'CreateProductTopic'
   iam:
     role:
       statements:
@@ -140,6 +142,7 @@ functions:
             Fn::GetAtt:
               - receiverQueue
               - Arn
+          batchSize: 5
 
 resources:
   Resources:
