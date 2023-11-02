@@ -15,6 +15,7 @@
   ],
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.210.0",
+    "@aws-sdk/client-sns": "^3.441.0",
     "@aws-sdk/lib-dynamodb": "^3.210.0",
     "@aws-sdk/util-dynamodb": "^3.431.0",
     "dotenv": "^16.3.1",
