@@ -6,7 +6,7 @@ import {StockRepository} from "../db/stock.repository";
 import {StockService} from "../service/stock.service";
 import {ProductJson} from "../model";
 
-const snsClient = new SNSClient({ region: "ca-central-1" });
+const snsClient = new SNSClient({ region: "us-east-1" });
 export const catalogBatchProcess = async (event: SQSEvent): Promise<void> => {
   const productRepository = new ProductRepository();
   const stockRepository = new StockRepository()
