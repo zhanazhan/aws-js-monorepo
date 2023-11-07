@@ -10,7 +10,8 @@ provider:
     NODE_ENV: dev
     PRODUCTS_TABLE: products
     STOCKS_TABLE: stocks
-    SQS_QUEUE: receiverQueue
+    SQS_QUEUE:
+      Ref: 'CatalogItemsQueue'
     CREATE_PRODUCT_TOPIC_ARN:
       Ref: 'CreateProductTopic'
   iam:
@@ -44,6 +45,12 @@ provider:
             - sqs:GetQueueAttributes
           Resource:
             - Fn::GetAtt: [ "${provider.environment.SQS_QUEUE}", Arn ]
+        - Effect: Allow
+          Action:
+            - sns:Publish
+          Resource:
+            - Fn::GetAtt: [ "${provider.environment.CREATE_PRODUCT_TOPIC_ARN}", Arn ]
+
 
 plugins:
   - serverless-plugin-typescript 
@@ -180,9 +187,20 @@ resources:
               ProjectionType: 'ALL'
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.STOCKS_TABLE}
-    catalogItemsQueue:
+    CatalogItemsQueue:
       Type: 'AWS::SQS::Queue'
       Properties:
         BatchSize: 5
         QueueName: "${provider.environment.SQS_QUEUE}"
+    CreateProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: Create Product Notification
+        SnsTopicName: createProductTopic
+    EmailSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn: {"Ref": "CreateProductTopic"}
+        Protocol: email
+        Endpoint: zhanazhan@gmail.com
 

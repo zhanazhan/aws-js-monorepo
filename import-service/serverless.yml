@@ -12,7 +12,8 @@ provider:
   environment:
     NODE_ENV: dev
     IMAGE_UPLOAD_BUCKET: ${self:custom.bucket}
-    SQS_QUEUE: receiverQueue
+    SQS_QUEUE:
+       Ref: CatalogItemsQueue
   iam:
     role:
       statements:
@@ -65,14 +66,4 @@ resources:
         BucketName: ${self:custom.bucket}
     CatalogItemsQueue:
       Type: AWS::SQS::Queue
-    CreateProductTopic:
-      Type: AWS::SNS::Topic
-      Properties:
-        DisplayName: Create Product Notification
-        SnsTopicName: createProductTopic
-    EmailSubscription:
-      Type: AWS::SNS::Subscription
-      Properties:
-        Protocol: email
-        EndpointIdentifier:
 
