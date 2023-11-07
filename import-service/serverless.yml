@@ -12,6 +12,8 @@ provider:
   environment:
     NODE_ENV: dev
     IMAGE_UPLOAD_BUCKET: ${self:custom.bucket}
+    SQS_QUEUE:
+       Ref: CatalogItemsQueue
   iam:
     role:
       statements:
@@ -19,6 +21,20 @@ provider:
           Action:
             - 's3:*'
           Resource: '*'
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:ChangeMessageVisibility
+            - sqs:GetQueueUrl
+            - sqs:GetQueueAttributes
+          Resource:
+            - Fn::GetAtt: [ "${provider.environment.SQS_QUEUE}", Arn ]
+        - Effect: Allow
+          Resource: "*"
+          Action:
+            - "sns:*"
 
 plugins:
   - serverless-plugin-typescript
@@ -48,3 +64,6 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:custom.bucket}
+    CatalogItemsQueue:
+      Type: AWS::SQS::Queue
+

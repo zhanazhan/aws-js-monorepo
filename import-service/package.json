@@ -15,6 +15,8 @@
   ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.433.0",
+    "@aws-sdk/client-sns": "^3.441.0",
+    "@aws-sdk/client-sqs": "^3.438.0",
     "@aws-sdk/s3-request-presigner": "^3.433.0",
     "dotenv": "^16.3.1",
     "fast-csv": "^4.3.6",

@@ -10,6 +10,10 @@ provider:
     NODE_ENV: dev
     PRODUCTS_TABLE: products
     STOCKS_TABLE: stocks
+    SQS_QUEUE:
+      Ref: 'CatalogItemsQueue'
+    CREATE_PRODUCT_TOPIC_ARN:
+      Ref: 'CreateProductTopic'
   iam:
     role:
       statements:
@@ -31,6 +35,22 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.STOCKS_TABLE}"
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:ChangeMessageVisibility
+            - sqs:GetQueueUrl
+            - sqs:GetQueueAttributes
+          Resource:
+            - Fn::GetAtt: [ "${provider.environment.SQS_QUEUE}", Arn ]
+        - Effect: Allow
+          Action:
+            - sns:Publish
+          Resource:
+            - Fn::GetAtt: [ "${provider.environment.CREATE_PRODUCT_TOPIC_ARN}", Arn ]
+
 
 plugins:
   - serverless-plugin-typescript 
@@ -121,6 +141,16 @@ functions:
               - X-Amz-Security-Token
             allowCredentials: true
 
+  catalogBatchProcess:
+    handler: app/handler.catalogBatchProcess
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - receiverQueue
+              - Arn
+          batchSize: 5
+
 resources:
   Resources:
     products:
@@ -157,3 +187,20 @@ resources:
               ProjectionType: 'ALL'
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.STOCKS_TABLE}
+    CatalogItemsQueue:
+      Type: 'AWS::SQS::Queue'
+      Properties:
+        BatchSize: 5
+        QueueName: "${provider.environment.SQS_QUEUE}"
+    CreateProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: Create Product Notification
+        SnsTopicName: createProductTopic
+    EmailSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn: {"Ref": "CreateProductTopic"}
+        Protocol: email
+        Endpoint: zhanazhan@gmail.com
+
