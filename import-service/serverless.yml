@@ -10,6 +10,7 @@ provider:
   runtime: nodejs18.x
   lambdaHashingVersion: '20201221'
   environment:
+    AUTHORIZER: BasicAuthorizer
     NODE_ENV: dev
     IMAGE_UPLOAD_BUCKET: ${self:custom.bucket}
     SQS_QUEUE:
@@ -46,7 +47,28 @@ functions:
       - http:
           path: /import
           method: POST
-          cors: true
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
+          authorizer:
+            type: TOKEN
+            name: "${provider.environment.AUTHORIZER}"
+            identitySource: method.request.header.Authorization
+            arn:
+              Fn::GetAtt: [ "${provider.environment.AUTHORIZER}", Arn ]
+          request:
+            parameters:
+              querystrings:
+                name: true
+
   importFileParser:
     handler: src/parser.handler
     events:
