@@ -1,0 +1,50 @@
+service: import-service
+
+frameworkVersion: "3"
+
+custom:
+  bucket: jake-uploaded
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  lambdaHashingVersion: '20201221'
+  environment:
+    NODE_ENV: dev
+    IMAGE_UPLOAD_BUCKET: ${self:custom.bucket}
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 's3:*'
+          Resource: '*'
+
+plugins:
+  - serverless-plugin-typescript
+
+functions:
+  importProductsFile:
+    handler: src/upload.handler
+    events:
+      - http:
+          path: /import
+          method: POST
+          cors: true
+  importFileParser:
+    handler: src/parser.handler
+    events:
+      - s3:
+          bucket: ${self:custom.bucket}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+            - suffix: .csv
+          existing: true
+
+resources:
+  Resources:
+    FileUploadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucket}

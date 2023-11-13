@@ -126,6 +126,32 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Import CSV",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "products.csv"
+						}
+					]
+				},
+				"url": "https://dkv6hpmwp4.execute-api.us-east-1.amazonaws.com/dev/import"
+			},
+			"response": []
 		}
 	]
 }

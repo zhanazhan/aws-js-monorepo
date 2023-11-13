@@ -66,7 +66,7 @@ const uploadFileBy = async (url: string, file: File) => {
 
 	// save
 	const result = await fetch(destUrl.data, {
-		method: 'PUT',
+		method: 'POST',
 		body: file,
 	});
 
