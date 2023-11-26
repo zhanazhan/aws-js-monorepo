@@ -1,0 +1,6 @@
+# not needed folders for EB deployment
+src
+test
+db
+# not needed files for EB deployment
+package-lock.json
