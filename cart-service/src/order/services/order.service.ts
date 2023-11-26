@@ -2,38 +2,33 @@ import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 
 import { Order } from '../models';
+import {InjectRepository} from "@nestjs/typeorm";
+import {Repository} from "typeorm";
+import {UpdateResult} from "typeorm/query-builder/result/UpdateResult";
 
 @Injectable()
 export class OrderService {
-  private orders: Record<string, Order> = {}
 
-  findById(orderId: string): Order {
-    return this.orders[ orderId ];
+  constructor(@InjectRepository(Order)
+              private readonly repository: Repository<Order>) {
   }
 
-  create(data: any) {
+  findById(orderId: string): Promise<Order | null> {
+    return this.repository.findOneBy({id: orderId});
+  }
+
+  create(data: any): Promise<Order> {
     const id = v4(v4())
     const order = {
       ...data,
       id,
-      status: 'inProgress',
+      status: 'PROCESSING',
     };
 
-    this.orders[ id ] = order;
-
-    return order;
+    return this.repository.save(order);
   }
 
-  update(orderId, data) {
-    const order = this.findById(orderId);
-
-    if (!order) {
-      throw new Error('Order does not exist.');
-    }
-
-    this.orders[ orderId ] = {
-      ...data,
-      id: orderId,
-    }
+  update(orderId, data): Promise<UpdateResult> {
+    return this.repository.update({id: orderId}, data);
   }
 }

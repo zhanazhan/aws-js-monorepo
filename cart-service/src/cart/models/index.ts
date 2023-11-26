@@ -1,17 +1,30 @@
-export type Product = {
-  id: string,
-  title: string,
-  description: string,
-  price: number,
-};
+import {Column, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 
-
-export type CartItem = {
-  product: Product,
-  count: number,
+export class Product {
+  @PrimaryGeneratedColumn()
+  id: string;
+  @Column()
+  title: string;
+  @Column()
+  description: string;
+  @Column()
+  price: number;
 }
 
-export type Cart = {
-  id: string,
-  items: CartItem[],
+
+export class CartItem {
+  product: Product;
+  @Column()
+  count: number;
+  @ManyToOne(() => Cart, cart => cart.items)
+  cart: Cart;
+}
+
+export class Cart {
+  @PrimaryGeneratedColumn()
+  id: string;
+  @Column()
+  userId: string;
+  @OneToMany(() => CartItem, cartItem => cartItem.cart, { cascade: true })
+  items: CartItem[];
 }

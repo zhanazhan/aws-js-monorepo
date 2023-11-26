@@ -3,28 +3,34 @@ import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 
 import { Cart } from '../models';
+import {InjectRepository} from "@nestjs/typeorm";
+import {DeleteResult, Repository} from "typeorm";
+import {InsertResult} from "typeorm/query-builder/result/InsertResult";
+import {UpdateResult} from "typeorm/query-builder/result/UpdateResult";
 
 @Injectable()
 export class CartService {
-  private userCarts: Record<string, Cart> = {};
 
-  findByUserId(userId: string): Cart {
-    return this.userCarts[ userId ];
+  constructor(@InjectRepository(Cart)
+              private readonly repository: Repository<Cart>) {
+  }
+
+
+  findByUserId(userId: string): Promise<Cart> {
+    return this.repository.findOneBy({ userId });
   }
 
   createByUserId(userId: string) {
     const id = v4(v4());
     const userCart = {
       id,
+      userId,
       items: [],
     };
-
-    this.userCarts[ userId ] = userCart;
-
-    return userCart;
+    return this.repository.save(userCart);
   }
 
-  findOrCreateByUserId(userId: string): Cart {
+  findOrCreateByUserId(userId: string): Promise<Cart> {
     const userCart = this.findByUserId(userId);
 
     if (userCart) {
@@ -34,22 +40,21 @@ export class CartService {
     return this.createByUserId(userId);
   }
 
-  updateByUserId(userId: string, { items }: Cart): Cart {
-    const { id, ...rest } = this.findOrCreateByUserId(userId);
+  async updateByUserId(userId: string, { items }: Cart): Promise<Cart> {
+    const { id, ...rest } = await this.findOrCreateByUserId(userId);
 
     const updatedCart = {
       id,
-      ...rest,
+      userId,
       items: [ ...items ],
     }
 
-    this.userCarts[ userId ] = { ...updatedCart };
-
-    return { ...updatedCart };
+    await this.repository.update({userId: userId}, updatedCart);
+    return this.findOrCreateByUserId(userId);
   }
 
-  removeByUserId(userId): void {
-    this.userCarts[ userId ] = null;
+  removeByUserId(userId): Promise<DeleteResult> {
+    return this.repository.delete({userId});
   }
 
 }
